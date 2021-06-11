@@ -1,6 +1,5 @@
 const express = require('express');
-const personaController = require('./controllers/personaController');
-const persona = require('./models/persona');
+const qy = require('./database');
 const app = express();
 
 app.use(express.json());
@@ -20,30 +19,47 @@ app.post('/persona', async (req, res) =>{
             edad: req.body.edad,
             email: req.body.email
         }
+        let query = 'SELECT id FROM persona WHERE nombre= ?, apellido= ?, nickname = ?, edad = ?, email = ?';
 
-        var personaNueva = await personaController.guardarUnaPersona(persona);
+        let respuesta = await  qy(query, [req.body.nombre.toUpperCase()]);
 
-        res.send('La persona fue creada y su id es') + personaNueva.id;
+        if (respuesta.length > 0 ) {
+            throw new Error ('¡Esa persona ya existe!');
+        };
+
+        query = 'INSERT INTO persona nombre= ?, apellido= ?, nickname = ?, edad = ?, email = ?';
+
+        respuesta = await qy(query, [req.body.genero, req.body.apellido, req.body.nickname, req.body.edad, req.body.email]);
+
+        let response = await qy(`SELECT * FROM persona WHERE ID='${respuesta.insertId}'`)
+
+        res.status(200).send(response);
+        
         }
-        catch(e) {
-            console.error(error);
-                res.status(422).send({"Se produjo el siguiente error": error});
+        catch(e){
+            console.error(e.message);
+            res.status(413).send({'Error': e.message});
         }
 });
 
 //Buscar todas las personas
 app.get('/persona', async (req, res) => {
         try{
-        var listaDePersonas = await personaController.listarPersonas();
+        const query = 'SELECT * FROM persona';
 
-        res.send('Las personas de la lista son') + listaDePersonas;
+        const respuesta =  await qy(query);
+        
+        if (respuesta.length == null){
+                throw new Error('[]')
+            }
+            
+        res.send({"Respuesta": respuesta});
         }
-        catch (e) {
-            console.log(e);
-            res.sendStatus(422).send("Se produjo el siguiente error: ", e);
+        catch(e){
+            console.error(e.message);
+            res.status(413).send({'Error': e.message});
         }
-    
-    });
+});
     
 //Buscar Personas por ID
 app.get('/persona/:id', async (req, res) => {
@@ -51,34 +67,43 @@ app.get('/persona/:id', async (req, res) => {
             if (!req.params.id) {
                 res.status(400).send ('Falta el id');
 
-        var personaEncontrada = await personaController.buscarUnaPersona();
+        let query = 'SELECT * FROM persona WHERE id = ?';
+        
+        let respuesta = await qy(query, [req.params.id]);
 
-        res.send('Se encontro la persona') + personaEncontrada.id;
+        if (respuesta.length == 0 ) {
+            throw new Error ('Esa persona no existe');
+        };
+        
+        res.send({"Respuesta": respuesta}); 
         }
     }
-        catch(e) {
-            console.error(error);
-                res.status(422).send({"Se produjo el siguiente error": error});
-        }
-    });
+        catch(e){
+            console.error(e.message);
+            res.status(413).send({'Error': e.message});
+    }
+});
     
 //Actualizar Persona
 app.put('/persona/:id', async (req, res) => {  
         try {
-            if(!req.body.nombre || !req.body.apellido || !req.body.email) {
+            if(!req.body.edad || !req.body.email) {
                 res.status(400).send ('Faltan datos');
 
         var personaModificada = await personaController.modificarPersona();
 
-        res.send('Se actualizaron los datos de') + personaModificada(nickname, edad, email);
+        let query = "UPDATE persona SET edad = ?, email = ? WHERE id = ?"
+        
+        let respuesta = await qy(query, [req.params.id]);
+        
+        res.send({"Respuesta": respuesta}); 
         }
     }
-        catch(e) {
-            console.error(error);
-                res.status(422).send({"Se produjo el siguiente error": error});
-        }
-    });
-    
+        catch(e){
+            console.error(e.message);
+            res.status(413).send({'Error': e.message});
+    }
+});
     
 //Eliminar Persona
 app.delete('/persona/:id', async (req, res) => {
@@ -91,11 +116,11 @@ app.delete('/persona/:id', async (req, res) => {
         res.send('Se elimino a') + personaEliminada;
         }
     }
-        catch(e) {
-            console.error(error);
-                res.sendstatus(422).send({"Se produjo el siguiente error": error});
-        }
-    });
+        catch(e){
+            console.error(e.message);
+            res.status(413).send({'Error': e.message});
+    }
+});
         
 app.listen (PORT, ()=>{
         console.log ('Servidor escuchando en el puerto' + PORT)
