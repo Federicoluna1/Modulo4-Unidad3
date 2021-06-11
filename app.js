@@ -1,8 +1,12 @@
 const express = require('express');
+const personaController = require('./controllers/personaController');
+const personaModel = require('./models/persona');
 const qy = require('./database');
 const app = express();
 
 app.use(express.json());
+
+app.use(express.urlencoded());
 
 const PORT = process.env.PORT ? process.env.PORT : 3000;
 
@@ -19,41 +23,29 @@ app.post('/persona', async (req, res) =>{
             edad: req.body.edad,
             email: req.body.email
         }
-        let query = 'SELECT id FROM persona WHERE nombre= ?, apellido= ?, nickname = ?, edad = ?, email = ?';
+        const personaNueva = await personaController.guardarUnaPersona(persona);
 
-        let respuesta = await  qy(query, [req.body.nombre.toUpperCase()]);
-
-        if (respuesta.length > 0 ) {
-            throw new Error ('¡Esa persona ya existe!');
-        };
-
-        query = 'INSERT INTO persona nombre= ?, apellido= ?, nickname = ?, edad = ?, email = ?';
-
-        respuesta = await qy(query, [req.body.genero, req.body.apellido, req.body.nickname, req.body.edad, req.body.email]);
-
-        let response = await qy(`SELECT * FROM persona WHERE ID='${respuesta.insertId}'`)
-
-        res.status(200).send(response);
-        
-        }
-        catch(e){
-            console.error(e.message);
-            res.status(413).send({'Error': e.message});
-        }
+        res.send(
+            'La persona se creo satisfactoriamente, el id asignado es ' +
+            personaNueva.id
+        );
+    } catch (error) {
+        console.log('Se produjo el siguiente error ', error);
+        res.sendStatus(422).send('Se produjo el siguiente error: ', error);
+    }
 });
 
 //Buscar todas las personas
 app.get('/persona', async (req, res) => {
         try{
-        const query = 'SELECT * FROM persona';
-
-        const respuesta =  await qy(query);
         
-        if (respuesta.length == null){
-                throw new Error('[]')
+        const listado = await personaController.listarPersonas();
+        
+        if (listado.length == 0){
+            res.status(400).send ('No hay personas en la lista');
             }
-            
-        res.send({"Respuesta": respuesta});
+
+        res.send({listado});
         }
         catch(e){
             console.error(e.message);
@@ -65,21 +57,20 @@ app.get('/persona', async (req, res) => {
 app.get('/persona/:id', async (req, res) => {
         try{
             if (!req.params.id) {
-                res.status(400).send ('Falta el id');
+        res.status(400).send ('Falta el id');
 
-        let query = 'SELECT * FROM persona WHERE id = ?';
+        const persona = await personaController.buscarUnaPersona(id);
         
-        let respuesta = await qy(query, [req.params.id]);
-
         if (respuesta.length == 0 ) {
             throw new Error ('Esa persona no existe');
         };
         
-        res.send({"Respuesta": respuesta}); 
+        res.send({persona});
         }
     }
         catch(e){
             console.error(e.message);
+            console.log(error);
             res.status(413).send({'Error': e.message});
     }
 });
@@ -89,14 +80,10 @@ app.put('/persona/:id', async (req, res) => {
         try {
             if(!req.body.edad || !req.body.email) {
                 res.status(400).send ('Faltan datos');
-
-        var personaModificada = await personaController.modificarPersona();
-
-        let query = "UPDATE persona SET edad = ?, email = ? WHERE id = ?"
         
-        let respuesta = await qy(query, [req.params.id]);
+        const resultado = await personaController.modificarPersona(id, edad, mail);
         
-        res.send({"Respuesta": respuesta}); 
+        res.send({resultado}); 
         }
     }
         catch(e){
@@ -108,12 +95,12 @@ app.put('/persona/:id', async (req, res) => {
 //Eliminar Persona
 app.delete('/persona/:id', async (req, res) => {
         try {
-            if(!req.body.nombre || !req.body.apellido || !req.body.email) {
-                res.status(400).send ('Faltan datos');
-    
-        var personaEliminada = await personaController.borrarPersona();
+            if (!req.params.id) {
+                res.status(400).send ('Falta el id');
+
+        resultado = await personaController.borrarPersona(id);
         
-        res.send('Se elimino a') + personaEliminada;
+        res.send({resultado});
         }
     }
         catch(e){
