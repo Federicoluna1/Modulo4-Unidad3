@@ -14,12 +14,12 @@ module.exports = {
         var listaDePersonas = await personaModel.buscarTodasLasPersonas();
         return listaDePersonas;
     },
-    traerUnaPersona: async function(id) {
+    buscarUnaPersona: async function(id) {
         var persona = personaModel.buscarUnaPersona(id);
         return persona;
     },
-    modificarPersona: async function(id, edad, mail) {
-        var resultado = await personaModel.modificarPersona(id, edad, mail);
+    modificarPersona: async function(edad, email) {
+        var resultado = await personaModel.modificarPersona(edad, email);
 
         if (resultado == 1) {
             return true;
