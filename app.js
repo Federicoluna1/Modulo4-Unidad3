@@ -1,6 +1,5 @@
 const express = require('express');
 const personaController = require('./controllers/personaController');
-const personaModel = require('./models/persona');
 const qy = require('./database');
 const app = express();
 
@@ -37,55 +36,58 @@ app.post('/persona', async (req, res) =>{
 
 //Buscar todas las personas
 app.get('/persona', async (req, res) => {
-        try{
-        
-        const listado = await personaController.listarPersonas();
-        
-        if (listado.length == 0){
-            res.status(400).send ('No hay personas en la lista');
-            }
+    try{
+    
+    const listado = await personaController.listarPersonas();
+    
+    if (listado.length == 0){
+        res.status(400).send ('No hay personas en la lista');
+        }
 
-        res.send({listado});
-        }
-        catch(e){
-            console.error(e.message);
-            res.status(413).send({'Error': e.message});
-        }
+    res.send({listado});
+    }
+    catch(e){
+        console.error(e.message);
+        res.status(413).send({'Error': e.message});
+    }
 });
     
 //Buscar Personas por ID
-app.get('/persona/:id', async (req, res) => {
-        try{
-            if (!req.params.id) {
-        res.status(400).send ('Falta el id');
+app.get('/persona/:id', async (req, res) => {  
+     try {   
 
+        const id = req.params.id;
+        
         const persona = await personaController.buscarUnaPersona(id);
         
-        if (respuesta.length == 0 ) {
+        if (persona.length == 0 ) {
             throw new Error ('Esa persona no existe');
-        };
+        }
         
         res.send({persona});
-        }
     }
         catch(e){
             console.error(e.message);
-            console.log(error);
             res.status(413).send({'Error': e.message});
     }
 });
     
 //Actualizar Persona
 app.put('/persona/:id', async (req, res) => {  
-        try {
-            if(!req.body.edad || !req.body.email) {
-                res.status(400).send ('Faltan datos');
-        
-        const resultado = await personaController.modificarPersona(id, edad, mail);
-        
-        res.send({resultado}); 
+    try {
+
+        const edad = req.body.edad;
+        const email = req.body.email;
+        const id = req.params.id;
+
+        if (!edad || !email) {
+            throw new Error('Faltan datos');
         }
-    }
+    
+        const resultado = await personaController.modificarPersona(id, edad, email);
+        console.log(resultado);
+        res.send('Los datos se modificaron con exito');
+        }    
         catch(e){
             console.error(e.message);
             res.status(413).send({'Error': e.message});
@@ -95,12 +97,15 @@ app.put('/persona/:id', async (req, res) => {
 //Eliminar Persona
 app.delete('/persona/:id', async (req, res) => {
         try {
-            if (!req.params.id) {
+        
+        const id = req.params.id; 
+
+        if (!req.params.id) {
                 res.status(400).send ('Falta el id');
 
-        resultado = await personaController.borrarPersona(id);
-        
-        res.send({resultado});
+        const resultado = await personaController.borrarPersona(id);
+        console.log(resultado);
+        res.send('La persona fue eliminada');
         }
     }
         catch(e){
