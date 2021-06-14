@@ -15,14 +15,13 @@ module.exports = {
         var listadoPersonas = await qy("SELECT * FROM persona");
         return listadoPersonas;
     },
-    modificarPersona: async function(edad, email) {
+    modificarPersona: async function(id, edad, email) {
         var result = await qy(
-            "UPDATE persona SET edad = ?, email = ? WHERE id = ?", [persona.edad, persona.email]);
+            "UPDATE persona SET edad = ?, email = ? WHERE id = ?", [edad, email, id]);
         return result.changedRows;
     },
     borrarPersona: async function(id) {
-        var fecha = new Date();
-        var result = await qy("UPDATE persona SET deleted = ?, date_deleted = ?", [true, fecha]);
+        var result = await qy("DELETE FROM persona WHERE id=?", [id]);
         return result.affectedRows;
-    },
+    }
 }
