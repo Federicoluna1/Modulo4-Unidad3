@@ -102,11 +102,11 @@ app.delete('/persona/:id', async (req, res) => {
 
         if (!req.params.id) {
                 res.status(400).send ('Falta el id');
-
-        const resultado = await personaController.borrarPersona(id);
+        }
+        resultado = await personaController.borrarPersona(id);
         console.log(resultado);
         res.send('La persona fue eliminada');
-        }
+        
     }
         catch(e){
             console.error(e.message);
