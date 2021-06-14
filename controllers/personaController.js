@@ -24,12 +24,11 @@ module.exports = {
         return persona;
     },
     borrarPersona: async function(id) {
-        var persona = null;
 
         var resultado = await personaService.borrarPersona(id);
 
         if (resultado) {
-            persona = await persona.personaService.buscarUnaPersona(id);
+            const persona = await persona.personaService.buscarUnaPersona(id);
         }
 
         return persona;
