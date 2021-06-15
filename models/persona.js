@@ -18,7 +18,7 @@ module.exports = {
     modificarPersona: async function(id, edad, email) {
         var result = await qy(
             "UPDATE persona SET edad = ?, email = ? WHERE id = ?", [edad, email, id]);
-        return result.changedRows;
+        return result.affectedRows;
     },
     borrarPersona: async function(id) {
         var result = await qy("DELETE FROM persona WHERE id=?", [id]);
