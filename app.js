@@ -103,6 +103,8 @@ app.delete('/persona/:id', async (req, res) => {
         console.log(resultado);
         if(resultado) {
             res.send('La persona fue eliminada');
+        }else {
+            throw new Error('La persona no existe');
         }
     }
         catch(e){
