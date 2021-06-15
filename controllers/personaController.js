@@ -19,7 +19,7 @@ module.exports = {
         var resultado = await personaService.modificarPersona(id, edad, email);
 
         if (resultado) {
-            persona = await persona.personaService.buscarUnaPersona(id);
+            persona = await personaService.buscarUnaPersona(id);
         }
         return persona;
     },
@@ -29,7 +29,7 @@ module.exports = {
         var resultado = await personaService.borrarPersona(id);
 
         if (resultado) {
-            persona = await persona.personaService.buscarUnaPersona(id);
+            persona = await personaService.buscarUnaPersona(id);
         }
 
         return persona;
