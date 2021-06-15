@@ -18,8 +18,8 @@ module.exports = {
         var persona = personaModel.buscarUnaPersona(id);
         return persona;
     },
-    modificarPersona: async function(edad, email) {
-        var resultado = await personaModel.modificarPersona(edad, email);
+    modificarPersona: async function(id, edad, email) {
+        var resultado = await personaModel.modificarPersona(id, edad, email);
 
         if (resultado == 1) {
             return true;
@@ -30,7 +30,7 @@ module.exports = {
     borrarPersona: async function(id) {
         var resultado = await personaModel.borrarPersona(id);
 
-        if (resultado == 1) {
+        if (resultado) {
             return true;
         } else {
             return false;
